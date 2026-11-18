@@ -7,7 +7,7 @@ Latest
 ======
 
 Version 1.0.2+od.2 2026-11-18
-==========================
+=============================
 
 Fixed
 ~~~~~
@@ -15,7 +15,7 @@ Fixed
   1.0.2+od.1 lacked tomllib, which plugins use to read TOML files (the MScan map did not start).
 
 Version 1.0.2+od.1 2026-11-18
-==========================
+=============================
 
 Version 1.0.2 with the following fixes (fork odurif0/ESIBD-Explorer). Plugins written for 1.0 load
 unchanged: only major and minor versions are compared.

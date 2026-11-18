@@ -255,7 +255,8 @@ def _restore_dock_tab_order(mainWindow: QMainWindow) -> None:
         groups = json.loads(qSet.value(DOCK_TAB_ORDER, '[]'))
         for bar in _dock_tab_bars(mainWindow):
             titles = [bar.tabText(i) for i in range(bar.count())]
-            saved = max(groups, key=lambda group: len(set(group) & set(titles)), default=[])
+            # A live display has the title of its device: on equal overlap, prefer the group with the fewest other titles.
+            saved = max(groups, key=lambda group: (len(set(group) & set(titles)), -len(set(group) ^ set(titles))), default=[])
             order = [title for title in saved if title in titles]
             order += [title for title in titles if title not in order]
             for target, title in enumerate(order):
@@ -5817,16 +5818,10 @@ class TimeoutLock:
                 if result and not already_acquired:
                     with contextlib.suppress(RuntimeError):
                         self._lock.release()
-                try:
-                    exceeded = (self.lockParent.errorCount == self.lockParent.maxErrorCount
-                                or self.lockParent.errorCount > 2 * self.lockParent.maxErrorCount)
-                except RuntimeError:
-                    # maxErrorCount is a Setting backed by a Qt spin widget; reading it
-                    # after that widget was deleted during GUI teardown raises
-                    # RuntimeError and would otherwise crash closeGUI. During teardown the
-                    # close-on-errors check is irrelevant, so treat it as not exceeded.
-                    exceeded = False
-                if exceeded and isinstance(self.lockParent, DeviceController):
+                # Check the type first: the maxErrorCount of a DeviceController is a plain int, that of a Device is a Setting
+                # whose spin box may be read from any thread, or after its deletion on closing (RuntimeError).
+                if isinstance(self.lockParent, DeviceController) and (self.lockParent.errorCount == self.lockParent.maxErrorCount
+                                                                       or self.lockParent.errorCount > 2 * self.lockParent.maxErrorCount):
                     # only call closeCommunication when equal to maxErrorCount, Otherwise errors during closeCommunication could cause recursion.
                     self.print(f'Closing communication of {self.lockParent.name} after more than {self.lockParent.errorCount} consecutive errors.', flag=PRINT.ERROR)  # {e}
                     if not self.lockParent.closing:  # avoid recursion if lock cannot be acquired while closing
