@@ -174,6 +174,7 @@ class EsibdExplorer(QMainWindow):
 
     def saveUiState(self) -> None:
         """Save size and location of main window."""
+        _save_dock_tab_order(self)
         qSet.setValue(GEOMETRY, self.saveGeometry())
         self.pluginManager.Settings.raiseDock(showPlugin=True)  # need to be visible to give right dimensions
         self.app.processEvents()
@@ -227,6 +228,41 @@ class Application(QApplication):
     mainWindow: EsibdExplorer
     mouseInterceptor: 'MouseInterceptor'
     splashScreen: 'SplashScreen'
+
+
+DOCK_TAB_ORDER = 'dockTabOrder'
+
+
+def _dock_tab_bars(mainWindow: QMainWindow) -> list[QTabBar]:
+    """Tab bars of tabbed docks."""
+    return [bar for bar in mainWindow.findChildren(QTabBar, options=Qt.FindChildOption.FindDirectChildrenOnly)
+            if not bar.isHidden() and bar.count() > 1]
+
+
+def _save_dock_tab_order(mainWindow: QMainWindow) -> None:
+    """Remember the order of tabbed docks as arranged by the user; never blocks closing."""
+    import json  # noqa: PLC0415
+    with contextlib.suppress(Exception):
+        groups = [[bar.tabText(i) for i in range(bar.count())] for bar in _dock_tab_bars(mainWindow)]
+        if groups:
+            qSet.setValue(DOCK_TAB_ORDER, json.dumps(groups))
+
+
+def _restore_dock_tab_order(mainWindow: QMainWindow) -> None:
+    """Reapply the remembered order with adjacent moves, like a mouse drag; new docks go last."""
+    import json  # noqa: PLC0415
+    with contextlib.suppress(Exception):  # the default order remains usable
+        groups = json.loads(qSet.value(DOCK_TAB_ORDER, '[]'))
+        for bar in _dock_tab_bars(mainWindow):
+            titles = [bar.tabText(i) for i in range(bar.count())]
+            saved = max(groups, key=lambda group: len(set(group) & set(titles)), default=[])
+            order = [title for title in saved if title in titles]
+            order += [title for title in titles if title not in order]
+            for target, title in enumerate(order):
+                index = [bar.tabText(i) for i in range(bar.count())].index(title)
+                while index > target:  # one position at a time: a long move misorders Qt docks
+                    bar.moveTab(index, index - 1)
+                    index -= 1
 
 
 class PluginManager:
@@ -372,6 +408,7 @@ class PluginManager:
         self.finalizing = True
         self.finalizeInit()
         self.afterFinalizeInit()
+        _restore_dock_tab_order(self.mainWindow)
         self.toggleVideoRecorder()
         self.mainWindow.setUpdatesEnabled(True)
         self.finalizing = False
