@@ -13,8 +13,9 @@ Changed
 ~~~~~~~
 - The Windows executable runs Python 3.14.10 instead of 3.11.9, which no longer gets Windows releases.
   On Windows, time.time() now resolves 0.1 µs instead of 15.6 ms: readings get distinct timestamps.
-- contourpy 1.3.3, the first version with wheels for Python 3.14, replaces 1.2.1. The other packages keep
-  the versions of 1.0.2+od.3.
+- The executable uses the package versions of the plugins' test environment, among them numpy 2.5.3 and
+  scipy 1.18.1: with scipy 1.17.1, the simulated Transmission optimisation fell short of the optimum.
+  contourpy 1.3.3, the first version with wheels for Python 3.14, replaces 1.2.1.
 - The development environment (setup/esibd.yml) uses Python 3.14.
 
 Fixed
