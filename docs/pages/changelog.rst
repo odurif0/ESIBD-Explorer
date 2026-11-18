@@ -6,6 +6,14 @@ Changelog
 Latest
 ======
 
+Version 1.0.2+od.2 2026-11-18
+==========================
+
+Fixed
+~~~~~
+- The Windows executable bundles the whole Python standard library, as plugins may import any of it.
+  1.0.2+od.1 lacked tomllib, which plugins use to read TOML files (the MScan map did not start).
+
 Version 1.0.2+od.1 2026-11-18
 ==========================
 
