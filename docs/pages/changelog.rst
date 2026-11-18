@@ -6,6 +6,21 @@ Changelog
 Latest
 ======
 
+Version 1.0.2+od.3 2026-11-18
+=============================
+
+Fixed
+~~~~~
+- Settings files are read as UTF-8 before they are saved. On Windows, the kept settings of plugins that
+  were not loaded were re-encoded at every save.
+- Live displays get back their own tab order. They have the titles of their devices and took the order
+  of the device tabs.
+- Releasing a lock no longer reads the error limit of a device from its setting widget, which happened
+  from any thread and failed after the widget was deleted on closing.
+- A channel configuration completed with missing parameters is no longer exported again every hour.
+- An invalid saved window geometry no longer prevents the start.
+- About no longer shows a build of the current release as an unreleased version.
+
 Version 1.0.2+od.2 2026-11-18
 =============================
 
