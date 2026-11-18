@@ -5528,6 +5528,14 @@ class PlotDataItem(pyqtgraph.PlotDataItem):
     curveLegend: pg.LegendItem
 
 
+SCIENTIFIC_CURSOR_BELOW = .01  # nonzero cursor values below this are shown in scientific notation
+
+
+def _format_linear_plot_value(value: float) -> str:
+    """Keep ordinary cursor formatting without rounding small nonzero signals to zero."""
+    return f'{value:.2e}' if 0 < abs(value) < SCIENTIFIC_CURSOR_BELOW else f'{value:.2f}'
+
+
 class PlotItem(pg.PlotItem): # pyright: ignore[reportGeneralTypeIssues]
     """PlotItem providing xyLabel."""
 
@@ -5637,7 +5645,7 @@ class PlotItem(pg.PlotItem): # pyright: ignore[reportGeneralTypeIssues]
                     if self.ctrl.logYCheck.isChecked():
                         self.xyLabel.setText(f"t = {datetime.fromtimestamp(pos.x()).strftime('%Y-%m-%d %H:%M:%S')}, y = {10**pos.y():.2e}")
                     else:
-                        self.xyLabel.setText(f"t = {datetime.fromtimestamp(pos.x()).strftime('%Y-%m-%d %H:%M:%S')}, y = {pos.y():.2f}")
+                        self.xyLabel.setText(f"t = {datetime.fromtimestamp(pos.x()).strftime('%Y-%m-%d %H:%M:%S')}, y = {_format_linear_plot_value(pos.y())}")
                     self.xyLabel.setPos(viewBox.geometry().width() - self.xyLabel.boundingRect().width() - 4, 2)
                 except (OSError, ValueError, OverflowError):
                     pass  # ignore errors that occur before time axis is initialized
