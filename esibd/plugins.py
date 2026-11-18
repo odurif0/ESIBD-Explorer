@@ -2640,6 +2640,7 @@ class ChannelManager(Plugin):
         """Export configuration to default file if it has changed."""
         if self.channelConfigChanged(useDefaultFile=True) or self.channelsChanged:
             self.exportConfiguration(useDefaultFile=True)
+            self.channelsChanged = False  # the added parameters are in the file now
 
     @synchronized()
     def toggleAdvanced(self, advanced: 'bool | None' = False) -> None:  # noqa: C901, D102
@@ -6230,7 +6231,7 @@ class SettingsManager(Plugin):
             # load and update content. Keep settings of currently used plugins untouched as they may be needed when these plugins are enabled in the future
             config = configparser.ConfigParser()
             if file.exists():
-                config.read(file)
+                config.read(file, encoding=self.UTF8)
             config[INFO] = infoDict(self.name)
             for name, defaultSetting in self.defaultSettings.items():
                 if name not in {Parameter.DEFAULT.upper(), VERSION} and not self.settings[name].internal:
