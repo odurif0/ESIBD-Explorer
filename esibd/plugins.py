@@ -5008,11 +5008,12 @@ class Browser(Plugin):
         try:
             response = requests.get('https://github.com/ioneater/ESIBD-Explorer/releases/latest', timeout=5)
             onlineVersion = version.parse(response.url.split('/').pop())
-            if onlineVersion == PROGRAM_VERSION:
+            localVersion = version.parse(PROGRAM_VERSION.public)  # without the local label: 1.0.2+od.2 is a build of release 1.0.2
+            if onlineVersion == localVersion:
                 updateHTML = '(<span style="color: green">Up to date!</span>)'
-            elif onlineVersion < PROGRAM_VERSION:
+            elif onlineVersion < localVersion:
                 updateHTML = '(<span style="color: orange">Unreleased Version!</span>)'
-            elif onlineVersion > PROGRAM_VERSION:
+            elif onlineVersion > localVersion:
                 updateHTML = f'(<a href="https://github.com/ioneater/ESIBD-Explorer/releases/latest">Version {onlineVersion.base_version} available!</a>)'
         except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout, InvalidVersion):
             pass
