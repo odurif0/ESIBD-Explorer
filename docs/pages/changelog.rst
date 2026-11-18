@@ -6,6 +6,23 @@ Changelog
 Latest
 ======
 
+Version 1.0.2+od.4 2026-11-18
+=============================
+
+Changed
+~~~~~~~
+- The Windows executable runs Python 3.14.10 instead of 3.11.9, which no longer gets Windows releases.
+  On Windows, time.time() now resolves 0.1 µs instead of 15.6 ms: readings get distinct timestamps.
+- contourpy 1.3.3, the first version with wheels for Python 3.14, replaces 1.2.1. The other packages keep
+  the versions of 1.0.2+od.3.
+- The development environment (setup/esibd.yml) uses Python 3.14.
+
+Fixed
+~~~~~
+- A redirected stdout (cp1252 on Windows) no longer stops the log. Messages with the warning or error icon
+  raised an error there, reported in turn, and the log held only this cascade.
+- Loading the GA scan no longer prints a SyntaxWarning (invalid escape sequence) in the log of every start.
+
 Version 1.0.2+od.3 2026-11-18
 =============================
 
