@@ -173,7 +173,7 @@ conda activate esibd-offline
 pip install pyinstaller
 REM Run the following line to create initial spec file and pyinstaller_dist and pyinstaller_build
 REM ATTENTION: Check absolute paths in Files, Shortcuts, and Build! relative paths using <InstallPath> did not work
-pyinstaller start.py -n "ESIBD Explorer" --noconsole --clean --icon=esibd/media/ESIBD_Explorer.ico --add-data="esibd;esibd" --copy-metadata nidaqmx --copy-metadata nitypes --noconfirm --additional-hooks-dir=./pyinstaller_hooks --distpath ./pyinstaller_dist --workpath ./pyinstaller_build
+pyinstaller tools/windows_entrypoint.py -n "ESIBD Explorer" --noconsole --clean --icon=esibd/media/ESIBD_Explorer.ico --add-data="esibd;esibd" --copy-metadata nidaqmx --copy-metadata nitypes --noconfirm --additional-hooks-dir=./pyinstaller_hooks --distpath ./pyinstaller_dist --workpath ./pyinstaller_build
 REM --noconsole  # console can be useful for debugging. start .exe from command window to keep errors visible after crash
 REM --additional-hooks-dir=./pyinstaller_hooks -> add any modules that plugins may require at run time but are not imported at packaging time: e.g. modules only imported in plugins. modules added here should likely also be added to autodoc_mock_imports in docs/conf.py
 REM --onefile meant for release to make sure all dependencies are included in the exe but extracting everything from one exe on every start is unacceptably slow. For debugging use --onedir (default) Use this option only when you are sure that it does not limit performance or complicates debugging
