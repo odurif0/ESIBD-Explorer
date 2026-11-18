@@ -6,6 +6,27 @@ Changelog
 Latest
 ======
 
+Version 1.0.2+od.1 2026-11-18
+==========================
+
+Version 1.0.2 with the following fixes (fork odurif0/ESIBD-Explorer). Plugins written for 1.0 load
+unchanged: only major and minor versions are compared.
+
+Fixed
+~~~~~
+- Closing no longer crashes when an error count is read after its setting widget was deleted.
+- The configuration is saved on the main thread only (it was exported twice, once from a background thread).
+- The Explorer tree is refreshed from the GUI thread only, never from the threads of the regular data export,
+  which froze the GUI for seconds.
+- INI files are read as UTF-8, as they are written (non-ASCII units and names were garbled on Windows).
+- A channel item without a name no longer raises KeyError when a missing parameter is added.
+- The plot cursor shows small nonzero values in scientific notation instead of 0.00.
+
+Changed
+~~~~~~~
+- The plotted time range is found by binary search instead of a scan of the whole history at every refresh.
+- The order of tabbed docks is kept across restarts.
+
 Version 1.0.2 2026-10-03
 ========================
 
