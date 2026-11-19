@@ -242,6 +242,7 @@ def _dock_tab_bars(mainWindow: QMainWindow, copies: bool = False) -> list[QTabBa
     every bar in that order is returned, so that the one Qt uses is among them.
     """
     import struct  # noqa: PLC0415  # imported here: tests compile these functions on their own
+
     from PyQt6 import sip  # noqa: PLC0415
     from PyQt6.QtWidgets import QDockWidget  # noqa: PLC0415
     state = bytes(mainWindow.saveState())
