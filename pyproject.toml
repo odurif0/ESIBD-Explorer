@@ -29,10 +29,10 @@ dependencies = [
 	'pyautogui',
 	'PyOpenGL',  # ==3.1.7
 	'pyperclip',  # ==1.8.2
-    'pyqt6==6.6',
-    'pyqt6-qt6==6.6',
-    'pyqt6-webengine==6.6',
-    'pyqt6-webengine-qt6==6.6',
+    'pyqt6==6.12.1',
+    'pyqt6-qt6==6.12.0',
+    'pyqt6-webengine==6.140.1',
+    'pyqt6-webengine-qt6==6.140.0',
 	'python-pptx',  # ==0.6.23
 	'pyserial',  # ==3.5
 	'python-socketio',  # ==5.10.0
