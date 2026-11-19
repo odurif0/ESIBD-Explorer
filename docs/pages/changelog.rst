@@ -6,6 +6,23 @@ Changelog
 Latest
 ======
 
+Version 1.0.2+od.5 2026-11-19
+=============================
+
+Changed
+~~~~~~~
+- PyQt6 6.12.1 (Qt 6.12.0) and PyQt6-WebEngine 6.140.1 replace 6.6, which is no longer maintained.
+- The Windows executable is built with the scripts of tools/windows-build (Windows CPython under Wine)
+  and the package versions of tools/windows-build/constraints-windows.txt. The plugins are tested with
+  this Explorer and these versions.
+
+Fixed
+~~~~~
+- The order of tabbed docks is read from Qt's own layout. Since Qt 6.7, a stale copy of a tab bar stays
+  behind the docks, and the saved order could come from it.
+- The images of the About page and of the plugin help pages show again. QtWebEngine 6.140 denies local
+  pages their local files once remote URLs are allowed, unless asked; their paths are file URLs now.
+
 Version 1.0.2+od.4 2026-11-18
 =============================
 
