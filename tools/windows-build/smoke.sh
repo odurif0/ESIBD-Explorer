@@ -2,14 +2,14 @@
 # Start the frozen Explorer under Wine on the Xvfb display for 240 s, with a fresh profile:
 # screenshots at 60, 120 and 180 s and the Explorer log go to $ESIBD_BUILD_DIR/smoke*.
 # stdout is closed, as for the windowed executable on Windows. With Qt 6.12 the test-only mscms stub
-# is loaded (WINEDLLOVERRIDES=mscms=n, see wine-shims/README.md).
+# is loaded (WINEDLLOVERRIDES=mscms=n, see wine-shims/README.md).  Usage: smoke.sh [FOLDER]   (default: the dist)
 set -uo pipefail
 source "$(dirname "$0")/env.sh"
 export WINEDLLOVERRIDES=${WINEDLLOVERRIDES:-mscms=n}
 PROFILE="$WINEPREFIX/drive_c/users/$USER/ESIBD Explorer"
 [ -d "$PROFILE" ] && mv "$PROFILE" "$PROFILE.$(date +%Y%m%d-%H%M%S)"
 rm -f "$ESIBD_BUILD_DIR"/smoke_*.png "$ESIBD_BUILD_DIR/smoke_explorer.log"
-cd "$DIST" || exit 1
+cd "${1:-$DIST}" || exit 1
 timeout 240 wine "ESIBD Explorer.exe" < /dev/null >&- 2> "$ESIBD_BUILD_DIR/smoke_stderr.log" &
 pid=$!
 for t in 60 120 180; do
