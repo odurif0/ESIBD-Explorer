@@ -6,6 +6,15 @@ Changelog
 Latest
 ======
 
+Version 1.0.2+od.6 2026-11-19
+=============================
+
+Fixed
+~~~~~
+- Restoring the order of tabbed docks no longer risks crashing Qt 6.12 at start. Since Qt 6.7, a stale
+  copy of a tab bar can stay behind the docks, and moving its tabs crashes. The docks are now tabified
+  again in the saved order, through the main window.
+
 Version 1.0.2+od.5 2026-11-19
 =============================
 
