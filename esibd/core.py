@@ -233,66 +233,63 @@ class Application(QApplication):
 DOCK_TAB_ORDER = 'dockTabOrder'
 
 
-def _dock_tab_bars(mainWindow: QMainWindow, copies: bool = False) -> list[QTabBar]:
-    """Tab bars of tabbed docks, one per group.
+def _dock_tab_groups(mainWindow: QMainWindow) -> 'list[list[QDockWidget]]':
+    """Return the groups of tabbed docks, each in its tab order.
 
-    Since Qt 6.7, tabifying a second group leaves a copy of its tab bar that Qt no longer updates (Qt 6.6
-    retired it). A bar is kept only if it lists its docks in the order Qt keeps them, which
-    QMainWindow.saveState writes. Moving the tabs of a copy does not move the docks: with copies=True,
-    every bar in that order is returned, so that the one Qt uses is among them.
+    Both come from the main window, not from its tab bars: since Qt 6.7, tabifying a second group can leave
+    behind a copy of its tab bar that Qt no longer updates.
     """
     import struct  # noqa: PLC0415  # imported here: tests compile these functions on their own
 
-    from PyQt6 import sip  # noqa: PLC0415
     from PyQt6.QtWidgets import QDockWidget  # noqa: PLC0415
     state = bytes(mainWindow.saveState())
-    docks = {int(sip.unwrapinstance(dock)): dock for dock in mainWindow.findChildren(QDockWidget)}
 
-    def position(dock: 'QDockWidget | None') -> int:
-        """Offset of the dock's name in the saved state: a QString is its byte length, then UTF-16BE."""
-        name = dock.objectName().encode('utf-16-be') if dock is not None else b''
+    def position(dock: QDockWidget) -> int:
+        """Offset of the dock's name in the saved state, where a QString is its byte length, then UTF-16BE."""
+        name = dock.objectName().encode('utf-16-be')
         return state.find(struct.pack('>I', len(name)) + name) if name else -1
 
-    bars, groups = [], set()
-    for bar in mainWindow.findChildren(QTabBar, options=Qt.FindChildOption.FindDirectChildrenOnly):
-        if bar.isHidden() or bar.count() < 2:  # noqa: PLR2004
-            continue
-        tabs = [docks.get(bar.tabData(i)) for i in range(bar.count())]
-        positions = [position(dock) for dock in tabs]
-        if -1 not in positions and positions != sorted(positions):
-            continue  # a stale copy
-        group = frozenset(id(dock) for dock in tabs)
-        if copies or group not in groups:
-            bars.append(bar)
-            groups.add(group)
-    return bars
+    groups: list[list[QDockWidget]] = []
+    for dock in mainWindow.findChildren(QDockWidget):
+        tabbed = mainWindow.tabifiedDockWidgets(dock)
+        if tabbed and not any(dock in group for group in groups):
+            groups.append(sorted([dock, *tabbed], key=position))
+    return groups
 
 
 def _save_dock_tab_order(mainWindow: QMainWindow) -> None:
     """Remember the order of tabbed docks as arranged by the user; never blocks closing."""
     import json  # noqa: PLC0415
     with contextlib.suppress(Exception):
-        groups = [[bar.tabText(i) for i in range(bar.count())] for bar in _dock_tab_bars(mainWindow)]
+        groups = [[dock.windowTitle() for dock in group] for group in _dock_tab_groups(mainWindow)]
         if groups:
             qSet.setValue(DOCK_TAB_ORDER, json.dumps(groups))
 
 
 def _restore_dock_tab_order(mainWindow: QMainWindow) -> None:
-    """Reapply the remembered order with adjacent moves, like a mouse drag; new docks go last."""
+    """Reapply the remembered order, new docks last, by tabifying the docks again in that order.
+
+    Not by moving tabs: since Qt 6.7, moving the tabs of a tab bar can crash when the bar is a copy Qt no longer updates.
+    """
     import json  # noqa: PLC0415
     with contextlib.suppress(Exception):  # the default order remains usable
         groups = json.loads(qSet.value(DOCK_TAB_ORDER, '[]'))
-        for bar in _dock_tab_bars(mainWindow, copies=True):  # moves on a copy are harmless, and keep it in step
-            titles = [bar.tabText(i) for i in range(bar.count())]
+        for group in _dock_tab_groups(mainWindow):
+            titles = [dock.windowTitle() for dock in group]
             # A live display has the title of its device: on equal overlap, prefer the group with the fewest other titles.
-            saved = max(groups, key=lambda group: (len(set(group) & set(titles)), -len(set(group) ^ set(titles))), default=[])
-            order = [title for title in saved if title in titles]
-            order += [title for title in titles if title not in order]
-            for target, title in enumerate(order):
-                index = [bar.tabText(i) for i in range(bar.count())].index(title)
-                while index > target:  # one position at a time: a long move misorders Qt docks
-                    bar.moveTab(index, index - 1)
-                    index -= 1
+            saved = max(groups, key=lambda candidate: (len(set(candidate) & set(titles)), -len(set(candidate) ^ set(titles))), default=[])
+            order = []
+            for title in saved:
+                order += [dock for dock in group if dock.windowTitle() == title and dock not in order][:1]
+            order += [dock for dock in group if dock not in order]
+            if order == group:
+                continue
+            current = [dock for dock in group if not dock.visibleRegion().isEmpty()]
+            for dock in order[1:]:  # a dock is tabified last, but only once it has left its group
+                mainWindow.addDockWidget(mainWindow.dockWidgetArea(dock), dock)  # not removeDockWidget: PyQt would own the dock
+                mainWindow.tabifyDockWidget(order[0], dock)
+            for dock in current:  # otherwise the dock tabified last would be shown
+                dock.raise_()
 
 
 class PluginManager:
