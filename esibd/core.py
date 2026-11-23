@@ -2062,6 +2062,7 @@ class Parameter:
             elif self.parameterType in {PARAMETERTYPE.INT, PARAMETERTYPE.FLOAT, PARAMETERTYPE.EXP}:
                 if self.spin:
                     self.spin.setMinimumWidth(int(scaling * 50) + 10)  # empirical fixed width
+                    self.spin.setFont(font)  # also on the spin box: with Qt 6.12, its style sheet resets the font of its line edit
                     lineEdit = self.spin.lineEdit()
                     if lineEdit:
                         lineEdit.setFont(font)
