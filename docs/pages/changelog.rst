@@ -6,6 +6,24 @@ Changelog
 Latest
 ======
 
+Version 1.0.2+od.7 2026-11-27
+=============================
+
+Added
+~~~~~
+- A Windows installer (setup): Program Files, for all users. It first uninstalls an ESIBD Explorer
+  installed by an earlier installer, such as 1.0.2, after confirmation. Settings and data are kept.
+
+Changed
+~~~~~~~
+- Qt 6.12.1 replaces 6.12.0.
+
+Fixed
+~~~~~
+- The values of the channel tables show again (missing since 1.0.2+od.5). Qt 6.12.0 left their fields
+  1 px wide when their style had a margin, padding or border; Qt 6.12.1 fixes it. Their font size is
+  kept too: with Qt 6.12, a style sheet resets it.
+
 Version 1.0.2+od.6 2026-11-19
 =============================
 
